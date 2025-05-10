@@ -1,59 +1,80 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+import { useEffect } from "react";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
+  const tabScale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: tabScale.value }],
+    };
+  });
+
+  useEffect(() => {
+    tabScale.value = withSpring(1.05, { damping: 10 });
+    setTimeout(() => {
+      tabScale.value = withSpring(1, { damping: 15 });
+    }, 300);
+  }, []);
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+    <Animated.View style={[styles.container, animatedStyle]}>
+      <Tabs
+        screenOptions={{
+          tabBarLabelStyle: { fontSize: 12 },
+          tabBarStyle: { height: 60, paddingBottom: 10 },
+          headerTitleStyle: { fontWeight: "bold" },
+          headerStyle: { borderBottomWidth: 1 },
         }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        {/* Scan Tab (Show App Name & Profile Icon) */}
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "SnapCalix",
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="camera" size={24} color={color} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="mealplan"
+          options={{
+            title: "Meal Plan",
+            headerShown: false,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="restaurant" size={24} color={color} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="progress"
+          options={{
+            title: "Progress",
+            headerShown: false,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="analytics" size={24} color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+    </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
