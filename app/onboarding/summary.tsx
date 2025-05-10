@@ -63,7 +63,7 @@ export default function SummaryScreen() {
             setLoading(true)
             const user = await saveUserProfile(userData);
             updateUserData(user);
-            await generateMealPlan(user?.id, userData)
+            // await generateMealPlan(user?.id, userData)
             setLoading(false);
             router.navigate("/(tabs)")
         } catch (error) {
